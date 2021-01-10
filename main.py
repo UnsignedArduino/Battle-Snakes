@@ -19,15 +19,18 @@ def genomes(genomes, config):
     bois = []
 
     logger.debug("Create board")
-    matrix = tilemap.Board(block_size=10, blocks_x=50, blocks_y=50)
+    matrix = tilemap.Board(block_size=5, blocks_x=100, blocks_y=100)
     matrix.update()
 
     logger.debug("Create FFNs")
+    spawn_x = 3
     for id, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
         g.fitness = 0
-        bois.append(player_ai.Snake(matrix=matrix, spawn_x=5, spawn_y=5))
+        bois.append(player_ai.Snake(matrix=matrix, spawn_x=spawn_x, spawn_y=matrix.blocks_y-5))
+        logger.debug(f"Spawning boi at {spawn_x}, {matrix.blocks_y-5}")
+        spawn_x += 3
     logger.debug(f"List of bois: {repr(bois)}")
 
     logger.debug("Initiate PyGame")
@@ -76,18 +79,14 @@ def genomes(genomes, config):
                 logger.info(f"Boi {index+1} died!")
                 # TODO: Destroy boi and recreate
             logger.debug(f"Time to update boi {index+1} is {round((time.time() - start_time) * 1000)} ms")
+            matrix.update()
+            screen.blit(matrix, (0, 0))
+            pygame.display.flip()
+            clock.tick(fps)
 
         if alive == 0:
             logger.info(f"No bois are alive! Breaking")
             break
-
-        logger.debug("Blit tilemap")
-        matrix.update()
-        screen.blit(matrix, (0, 0))
-
-        logger.debug("Update screen")
-        pygame.display.flip()
-        clock.tick(fps)
 
 
 # TODO: Reduce number of bois
