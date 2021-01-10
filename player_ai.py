@@ -1,11 +1,6 @@
-import neat
-import numpy as np
-import math
-import random
 import tilemap
 import math
 from collections import namedtuple
-
 
 def distance(x1, x2, y1, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
