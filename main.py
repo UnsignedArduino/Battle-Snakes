@@ -5,6 +5,7 @@ import pygame
 from pygame import locals
 import sys
 import time
+import random
 from pathlib import Path
 from create_logger import create_logger
 import logging
@@ -12,6 +13,20 @@ import logging
 logger = create_logger(name=__name__, level=logging.WARNING)
 
 generation = 0
+food_x = 0
+food_y = 0
+has_food = False
+
+
+def create_food(board: tilemap.Board):
+    global food_x, food_y
+    food_x = random.randint(0, board.blocks_x)
+    food_y = random.randint(0, board.blocks_x)
+
+
+def draw_food(board: tilemap.Board):
+    global food_x, food_y
+    board.tile(food_x, food_y, (255, 0, 0))
 
 
 def genomes(genomes, config):
@@ -23,7 +38,7 @@ def genomes(genomes, config):
     matrix.update()
 
     logger.debug("Create FFNs")
-    spawn_x = 3
+    spawn_x = 10
     for id, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
@@ -40,7 +55,7 @@ def genomes(genomes, config):
     fps = 0
     clock = pygame.time.Clock()
 
-    global generation
+    global generation, has_food, food_x, food_y
     generation += 1
 
     logger.debug("Start super loop")
@@ -54,6 +69,10 @@ def genomes(genomes, config):
         logger.debug("Update bois")
         alive = 0
         for index, boi in enumerate(bois):
+            if not has_food:
+                create_food(matrix)
+                has_food = True
+            draw_food(matrix)
             logger.debug(f"Updating boi {index+1}/{len(bois)}")
             start_time = time.time()
             boi.update()
@@ -70,8 +89,6 @@ def genomes(genomes, config):
                 boi.down()
             elif i == 3:
                 boi.left()
-            else:
-                pass
             boi.update()
             if boi.alive:
                 alive += 1
