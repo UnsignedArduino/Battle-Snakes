@@ -22,32 +22,45 @@ class Snake:
         self.init()
         self.alive = True
         self.ate_food = False
+        self.check_snake_collision = False
 
     def init(self):
         for y_offset in range(3):
             self.tiles.append((self.x, self.y + y_offset))
 
     def up(self):
+        self.check_for_other_snake(change_y=-1)
         self.y -= 1
         self.update_tiles()
 
     def down(self):
+        self.check_for_other_snake(change_y=1)
         self.y += 1
         self.update_tiles()
 
     def left(self):
+        self.check_for_other_snake(change_x=-1)
         self.x -= 1
         self.update_tiles()
 
     def right(self):
+        self.check_for_other_snake(change_x=1)
         self.x += 1
         self.update_tiles()
+
+    def check_for_other_snake(self, change_x: int = 0, change_y: int = 0):
+        if not self.check_snake_collision:
+            return
+        if self.matrix.tile(self.tiles[0][0] + change_x, self.tiles[0][1] + change_y) == (128, 128, 128):
+            self.alive = False
+
 
     def update_tiles(self):
         self.tiles.insert(0, (self.x, self.y))
         if self.ate_food:
-            self.tiles.pop()
             self.ate_food = False
+        else:
+            self.tiles.pop()
 
     def update(self):
         if not self.alive:

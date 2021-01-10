@@ -54,7 +54,6 @@ def genomes(genomes, config):
         logger.debug("Update bois")
         alive = 0
         for index, boi in enumerate(bois):
-            matrix.clear()
             logger.debug(f"Updating boi {index+1}/{len(bois)}")
             start_time = time.time()
             boi.update()
@@ -79,17 +78,15 @@ def genomes(genomes, config):
             else:
                 logger.info(f"Boi {index+1} died!")
             logger.debug(f"Time to update boi {index+1} is {round((time.time() - start_time) * 1000)} ms")
-            for boii in bois:
-                boii.update()
             matrix.update()
             screen.blit(matrix, (0, 0))
             pygame.display.flip()
-            clock.tick(fps)
 
         if alive == 0:
             logger.info(f"No bois are alive! Breaking")
             break
 
+        clock.tick(fps)
 
 # TODO: Reduce number of bois
 
