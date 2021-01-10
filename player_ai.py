@@ -59,7 +59,7 @@ class Snake:
             if index == 0 and self.matrix.tile(tile[0], tile[1]) == (255, 0, 0):
                 self.ate_food = True
             if self.alive:
-                self.matrix.tile(tile[0], tile[1], (255, 255, 255))
+                self.matrix.tile(tile[0], tile[1], (128, 128, 128))
 
     @property
     def length(self):

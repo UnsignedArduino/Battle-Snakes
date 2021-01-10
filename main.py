@@ -30,7 +30,7 @@ def genomes(genomes, config):
         g.fitness = 0
         bois.append(player_ai.Snake(matrix=matrix, spawn_x=spawn_x, spawn_y=matrix.blocks_y-5))
         logger.debug(f"Spawning boi at {spawn_x}, {matrix.blocks_y-5}")
-        spawn_x += 3
+        spawn_x += 20
     logger.debug(f"List of bois: {repr(bois)}")
 
     logger.debug("Initiate PyGame")
@@ -54,6 +54,7 @@ def genomes(genomes, config):
         logger.debug("Update bois")
         alive = 0
         for index, boi in enumerate(bois):
+            matrix.clear()
             logger.debug(f"Updating boi {index+1}/{len(bois)}")
             start_time = time.time()
             boi.update()
@@ -77,8 +78,9 @@ def genomes(genomes, config):
                 genomes[i][1].fitness += boi.reward()
             else:
                 logger.info(f"Boi {index+1} died!")
-                # TODO: Destroy boi and recreate
             logger.debug(f"Time to update boi {index+1} is {round((time.time() - start_time) * 1000)} ms")
+            for boii in bois:
+                boii.update()
             matrix.update()
             screen.blit(matrix, (0, 0))
             pygame.display.flip()
