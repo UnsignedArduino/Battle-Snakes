@@ -3,12 +3,12 @@ import numpy as np
 import math
 import random
 import tilemap
-from math import sqrt
+import math
 from collections import namedtuple
 
 
-def distance(x1: int, y1: int, x2: int, y2: int):
-    return sqrt((x2-x1)**2 + (y2-y1)**2)
+def distance(x1, x2, y1, y2):
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
 class Snake:
@@ -102,11 +102,7 @@ class Snake:
 
     def find_food(self) -> namedtuple:
         Point = namedtuple("Point", ["x", "y"])
-        for y in range(self.matrix.height):
-            for x in range(self.matrix.width):
-                if self.matrix.tile(x, y) == (255, 0, 0):
-                    return Point(x, y)
-        return Point(-1, -1)
+        return Point(self.food_x, self.food_y)
 
     @property
     def direction_of_food(self) -> int:

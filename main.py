@@ -9,7 +9,7 @@ from pathlib import Path
 from create_logger import create_logger
 import logging
 
-logger = create_logger(name=__name__, level=logging.DEBUG)
+logger = create_logger(name=__name__, level=logging.WARNING)
 
 generation = 0
 
@@ -37,7 +37,7 @@ def genomes(genomes, config):
     pygame.init()
     width, height = 500, 500
     screen = pygame.display.set_mode((width, height))
-    fps = 30
+    fps = 0
     clock = pygame.time.Clock()
 
     global generation
@@ -57,10 +57,11 @@ def genomes(genomes, config):
             logger.debug(f"Updating boi {index+1}/{len(bois)}")
             start_time = time.time()
             boi.update()
-            # TODO: Boi return all -1 when ded
             data = boi.get_data()
+            logger.debug(f"Time to get data is {round((time.time() - start_time) * 1000)} ms")
             output = nets[index].activate(data)
             i = output.index(max(output))
+            logger.debug(f"Time to get output is {round((time.time() - start_time) * 1000)} ms")
             if i == 0:
                 boi.up()
             elif i == 1:
@@ -88,7 +89,6 @@ def genomes(genomes, config):
 
         clock.tick(fps)
 
-# TODO: Reduce number of bois
 
 if __name__ == "__main__":
     # Set configuration file
