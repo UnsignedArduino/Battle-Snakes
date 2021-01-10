@@ -1,10 +1,15 @@
 import neat
-from pathlib import Path
 import player_ai
 import tilemap
-import sys
 import pygame
 from pygame import locals
+import sys
+import time
+from pathlib import Path
+from create_logger import create_logger
+import logging
+
+logger = create_logger(name=__name__, level=logging.DEBUG)
 
 generation = 0
 
@@ -13,14 +18,19 @@ def genomes(genomes, config):
     nets = []
     bois = []
 
-    matrix = tilemap.Board(block_size=50)
+    logger.debug("Create board")
+    matrix = tilemap.Board(block_size=10, blocks_x=50, blocks_y=50)
     matrix.update()
+
+    logger.debug("Create FFNs")
     for id, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
         g.fitness = 0
         bois.append(player_ai.Snake(matrix=matrix, spawn_x=5, spawn_y=5))
+    logger.debug(f"List of bois: {repr(bois)}")
 
+    logger.debug("Initiate PyGame")
     pygame.init()
     width, height = 500, 500
     screen = pygame.display.set_mode((width, height))
@@ -30,15 +40,23 @@ def genomes(genomes, config):
     global generation
     generation += 1
 
+    logger.debug("Start super loop")
     while True:
+        logger.debug("Parse window events")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
 
+        logger.debug("Update bois")
+        alive = 0
         for index, boi in enumerate(bois):
+            logger.debug(f"Updating boi {index+1}/{len(bois)}")
+            start_time = time.time()
             boi.update()
-            output = nets[index].activate(boi.get_data())
+            # TODO: Boi return all -1 when ded
+            data = boi.get_data()
+            output = nets[index].activate(data)
             i = output.index(max(output))
             if i == 0:
                 boi.up()
@@ -51,28 +69,33 @@ def genomes(genomes, config):
             else:
                 pass
             boi.update()
-
-        alive = 0
-        for i, boi in enumerate(bois):
             if boi.alive:
                 alive += 1
-                boi.update()
                 genomes[i][1].fitness += boi.reward()
+            else:
+                logger.info(f"Boi {index+1} died!")
+                # TODO: Destroy boi and recreate
+            logger.debug(f"Time to update boi {index+1} is {round((time.time() - start_time) * 1000)} ms")
 
         if alive == 0:
+            logger.info(f"No bois are alive! Breaking")
             break
 
+        logger.debug("Blit tilemap")
+        matrix.update()
         screen.blit(matrix, (0, 0))
 
+        logger.debug("Update screen")
         pygame.display.flip()
         clock.tick(fps)
 
-        # TODO: Fix getting stuck and not updating display
 
+# TODO: Reduce number of bois
 
 if __name__ == "__main__":
     # Set configuration file
     config_path = Path.cwd() / "config-feedforward.txt"
+    logger.debug(f"Path to config file is {repr(config_path)}")
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
 
@@ -84,5 +107,6 @@ if __name__ == "__main__":
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
+    logger.debug("Run NEAT")
     # Run NEAT
     p.run(genomes, 1000)
